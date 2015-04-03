@@ -84,6 +84,12 @@ distances e = runSTArray $ do
         writeArray arr to (dfrom + eto, from)
       return ()
 
+findMin :: Seams -> (Int, Int)
+findMin seams = snd $ minimumBy (\x y -> (fst x) `compare` (fst y)) elms
+  where
+    elms = map (\i -> seams ! (i, height)) [start..width]
+    ((start,_), (width, height)) = bounds seams
+
 minSeam :: (Int, Int) -> Seams -> Seam
 minSeam from seams = runSTArray $ do
   seam <- newArray (start, end) (-1)
@@ -98,11 +104,26 @@ minSeam from seams = runSTArray $ do
           let newKey = snd $ seams ! key
           findSeam newKey seam
 
-findMin :: Seams -> (Int, Int)
-findMin seams = snd $ minimumBy (\x y -> (fst x) `compare` (fst y)) elms
+seamOverlay :: Seam -> RGBImg -> RGBImg
+seamOverlay seam image = runSTUArray $ do
+  newImage <- newArray size (0 :: Word8)
+
+  forM_ (range size) $ \i -> do
+    writeArray newImage i (image ! i)
+
+  forM_ (range (sy, h)) $ \j -> do
+    let i = seam ! j
+    when (i >= sx && i <= w) $ do
+      writeArray newImage (i, j, 0) 255
+      writeArray newImage (i, j, 1) 0
+      writeArray newImage (i, j, 2) 0
+      writeArray newImage (i, j, 3) 255
+
+  return newImage
+
   where
-    elms = map (\i -> seams ! (i, height)) [start..width]
-    ((start,_), (width, height)) = bounds seams
+    size = bounds image
+    ((sx, sy, _), (w, h, _)) = size
 
 removeVerticalSeam :: Seam -> RGBImg -> RGBImg
 removeVerticalSeam seam image = runSTUArray $ do
@@ -111,11 +132,12 @@ removeVerticalSeam seam image = runSTUArray $ do
   forM_ (range (ys, h)) $ \row -> do
     let arow = (seam ! row)
 
-    forM_ (range ((xs, arow), (zs, c))) $ \(col, ch) -> do
-      writeArray newImage (col, row, ch) (image ! (col, row, ch))
+    when (arow >= xs && arow <= w) $ do
+      forM_ (range ((xs, zs), (arow, c))) $ \(col, ch) -> do
+        writeArray newImage (col, row, ch) (image ! (col, row, ch))
 
-    forM_ (range ((arow, w - 1), (zs, c))) $ \(col, ch) -> do
-      writeArray newImage (col, row, ch) (image ! (col + 1, row, ch))
+      forM_ (range ((arow, zs), (w - 1, c))) $ \(col, ch) -> do
+        writeArray newImage (col, row, ch) (image ! (col + 1, row, ch))
 
   return newImage
 
@@ -125,7 +147,7 @@ removeVerticalSeam seam image = runSTUArray $ do
 
 main = do
   ilInit
-  image <- readImage "/home/mma/1.jpg"
+  image <- readImage "/home/mma/1.png"
   let en = energy image
   let seams = distances en
   let m = findMin seams
