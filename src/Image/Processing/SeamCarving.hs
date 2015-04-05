@@ -87,7 +87,7 @@ distances e = runSTArray $ do
 findMin :: Seams -> (Int, Int)
 findMin seams = snd $ minimumBy (\x y -> (fst x) `compare` (fst y)) elms
   where
-    elms = map (\i -> seams ! (i, height)) [start..width]
+    elms = map (\i -> (fst $ seams ! (i, height), (i, height))) [start..width]
     ((start,_), (width, height)) = bounds seams
 
 minSeam :: (Int, Int) -> Seams -> Seam
