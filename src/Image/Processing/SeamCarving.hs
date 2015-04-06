@@ -145,6 +145,16 @@ removeVerticalSeam seam image = runSTUArray $ do
     (start, (w,h,c)) = bounds image
     (xs, ys, zs) = start
 
+transposeImage :: RGBImg -> RGBImg
+transposeImage image = runSTUArray $ do
+  newImage <- newArray size (0 :: Word8)
+  forM_ (range size) $ \idx@(x, y, ch) -> do
+    writeArray newImage (y, x, ch) (image ! idx)
+  return newImage
+  where
+    ((cx, cy, cch), (w, h, channels)) = bounds image
+    size = ((cy, cx, cch), (h, w, channels))
+
 main = do
   ilInit
   image <- readImage "/home/mma/1.png"
