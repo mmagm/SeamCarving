@@ -1,10 +1,15 @@
+{-# LANGUAGE BangPatterns #-}
+
+module Image.Processing.SeamCarving
+
+where
+
 import Control.Monad
 import Control.Monad.ST
 import Data.Ix
 import Data.Array.ST
 import Data.Array.Unboxed
 import Data.List
-import Codec.Image.DevIL
 
 type Cell = (Float, (Int, Int))
 type Seams = Array (Int, Int) Cell
@@ -155,13 +160,16 @@ transposeImage image = runSTUArray $ do
     ((cx, cy, cch), (w, h, channels)) = bounds image
     size = ((cy, cx, cch), (h, w, channels))
 
-main = do
-  ilInit
-  image <- readImage "/home/mma/1.png"
-  let en = energy image
-  let seams = distances en
-  let m = findMin seams
-  let seam = minSeam m seams
-  let newImage = removeVerticalSeam seam image
-  writeImage "/home/mma/output.png" newImage
-  return ()
+removeVertical :: RGBImg -> RGBImg
+removeVertical image = () `seq` removeVerticalSeam seam image
+  where
+    en = energy image
+    seams = distances en
+    m = findMin seams
+    seam = minSeam m seams
+
+removeVerticals :: Int -> RGBImg -> RGBImg
+removeVerticals !n !image = removeVerticals (n - 1) $ removeVertical image
+
+removeHorizontals :: Int -> RGBImg -> RGBImg
+removeHorizontals n image = transposeImage $ removeVerticals n $ transposeImage image
