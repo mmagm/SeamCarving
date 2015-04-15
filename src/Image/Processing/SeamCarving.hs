@@ -5,7 +5,6 @@ module Image.Processing.SeamCarving
 where
 
 import Control.Monad
-import Control.Monad.ST
 import Data.Ix
 import Data.Array.ST
 import Data.Array.Unboxed
@@ -34,6 +33,7 @@ gradient c1 c2 = let r = fromIntegral $ rgbRed c1 - rgbRed c2
 
 toTuple :: [a] -> (a,a,a)
 toTuple [a,b,c] = (a,b,c)
+toTuple _ = error "only for list of 3 elems"
 
 energy :: RGBImg -> Img
 energy img = runSTArray $ do
