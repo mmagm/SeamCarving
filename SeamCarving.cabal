@@ -26,5 +26,5 @@ library
 executable carver
   hs-source-dirs:      carver
   main-is:             Main.hs
-  build-depends:       base >=4.6 && <4.7, SeamCarving, Codec-Image-DevIL
+  build-depends:       base >=4.6 && <4.7, SeamCarving, Codec-Image-DevIL, array
   default-language:    Haskell2010
