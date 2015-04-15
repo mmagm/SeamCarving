@@ -155,14 +155,14 @@ transposeImage :: RGBImg -> RGBImg
 transposeImage image = runSTUArray $ do
   newImage <- newArray size (0 :: Word8)
   forM_ (range size) $ \idx@(x, y, ch) -> do
-    writeArray newImage (y, x, ch) (image ! idx)
+    writeArray newImage idx (image ! (y, x, ch))
   return newImage
   where
     ((cx, cy, cch), (w, h, channels)) = bounds image
     size = ((cy, cx, cch), (h, w, channels))
 
 removeVertical :: RGBImg -> RGBImg
-removeVertical image = () `seq` removeVerticalSeam seam image
+removeVertical image = removeVerticalSeam seam image
   where
     en = energy image
     seams = distances en
@@ -170,7 +170,10 @@ removeVertical image = () `seq` removeVerticalSeam seam image
     seam = minSeam m seams
 
 removeVerticals :: Int -> RGBImg -> RGBImg
-removeVerticals !n !image = removeVerticals (n - 1) $ removeVertical image
+removeVerticals !n !image
+  | n > 0 = removeVerticals (n - 1) $ removeVertical image
+  | otherwise = image
 
 removeHorizontals :: Int -> RGBImg -> RGBImg
 removeHorizontals n image = transposeImage $ removeVerticals n $ transposeImage image
+
