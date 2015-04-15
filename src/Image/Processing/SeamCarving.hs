@@ -10,6 +10,7 @@ import Data.Ix
 import Data.Array.ST
 import Data.Array.Unboxed
 import Data.List
+import Data.Word
 
 type Cell = (Float, (Int, Int))
 type Seams = Array (Int, Int) Cell
