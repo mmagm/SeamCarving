@@ -26,7 +26,9 @@ main :: IO ()
 main = runCommand $ \opts args -> do
   ilInit
   image <- readImage $ optInput opts
-  let newImage = removeVerticals 300 $ removeHorizontals 500 image
+  let widthShrink = optWidth opts
+      heightShrink = optHeight opts
+  let newImage = removeVerticals widthShrink $ removeHorizontals heightShrink image
   putStrLn $ show $ bounds newImage
   writeImage (optOutput opts) newImage
   return ()
