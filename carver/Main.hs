@@ -1,6 +1,7 @@
 import Image.Processing.SeamCarving
 import Codec.Image.DevIL
 import Data.Array.Unboxed
+import Control.Applicative
 import Options
 
 data MainOptions = MainOptions
