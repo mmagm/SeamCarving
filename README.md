@@ -1,5 +1,5 @@
 # SeamCarving
-SeamCarving algorithm implemented in Haskell
+Seam carving algorithm implemented in Haskell
 
 ### Run
 
