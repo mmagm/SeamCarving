@@ -11,6 +11,7 @@ data MainOptions = MainOptions
     , optWidth :: Int
     , optHeight :: Int
     }
+    deriving(Show)
 
 instance Options MainOptions where
     defineOptions = pure MainOptions
@@ -26,10 +27,11 @@ instance Options MainOptions where
 main :: IO ()
 main = runCommand $ \opts args -> do
   ilInit
+  -- putStrLn $ show opts
   image <- readImage $ optInput opts
   let widthShrink = optWidth opts
       heightShrink = optHeight opts
   let newImage = removeVerticals widthShrink $ removeHorizontals heightShrink image
-  putStrLn $ show $ bounds newImage
+  -- putStrLn $ show $ bounds newImage
   writeImage (optOutput opts) newImage
   return ()
